@@ -6703,21 +6703,21 @@ function updateUserUI() {
 }
 
 // Bind custom modal launch on click
-document.addEventListener('DOMContentLoaded', () => {
-  updateUserUI();
-  
-  document.addEventListener('click', function(e) {
+document.addEventListener('click', function(e) {
+  var accBtn = e.target.closest('.header__icon--account') || e.target.closest('.menu-drawer__account');
+  if (accBtn) {
     // Check if user is logged in
     const isLoggedIn = localStorage.getItem('user_session') || sessionStorage.getItem('user_session');
     if (isLoggedIn) return; // Do not open modal if already logged in
     
-    var accBtn = e.target.closest('.header__icon--account') || e.target.closest('.menu-drawer__account');
-    if (accBtn) {
-      e.preventDefault();
-      e.stopPropagation();
-      openAuthModal();
-    }
-  });
+    e.preventDefault();
+    e.stopPropagation();
+    openAuthModal();
+  }
+}, true);
+
+document.addEventListener('DOMContentLoaded', () => {
+  updateUserUI();
 });
 </script>
 </body></html>
