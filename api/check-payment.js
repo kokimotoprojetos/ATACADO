@@ -30,17 +30,21 @@ export default async function handler(req, res) {
       return res.status(502).json({ error: 'Gateway retornou resposta inválida.' });
     }
 
-    if (!response.ok || !data.success) {
+    // Support both root-level response and documented data-wrapped response
+    const txData = data.hash ? data : (data.data || {});
+    const isSuccess = response.ok && (data.success !== false) && (txData.hash || txData.id);
+
+    if (!isSuccess) {
       console.error('[InvictusPay] Erro ao consultar status:', response.status, data);
       return res.status(200).json({ status: 'pending', rawStatus: 'error' });
     }
 
-    const txData = data.data || {};
-    console.log('[InvictusPay] Status da transação:', txData.status);
+    const statusVal = txData.status || txData.payment_status || '';
+    console.log('[InvictusPay] Status da transação:', statusVal);
 
     // Verify if paid
     const isPaid = ['paid', 'approved', 'completed', 'success', 'pago', 'aprovado'].includes(
-      String(txData.status || '').toLowerCase().trim()
+      String(statusVal).toLowerCase().trim()
     );
 
     return res.status(200).json({

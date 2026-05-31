@@ -33,16 +33,19 @@ export default async function handler(req, res) {
     }
 
     const data = await response.json();
-    if (!data.success || !data.data) {
-      console.warn('[InvictusPay Webhook] API returned success=false on verification query.');
+    const txData = data.hash ? data : (data.data || {});
+    const isSuccess = response.ok && (data.success !== false) && (txData.hash || txData.id);
+
+    if (!isSuccess) {
+      console.warn('[InvictusPay Webhook] API returned verification failure.');
       return res.status(400).json({ error: 'Verification failed' });
     }
 
-    const txData = data.data;
-    console.log('[InvictusPay Webhook] Securely verified transaction status:', txData.status);
+    const statusVal = txData.status || txData.payment_status || '';
+    console.log('[InvictusPay Webhook] Securely verified transaction status:', statusVal);
 
     const isPaid = ['paid', 'approved', 'completed', 'success', 'pago', 'aprovado'].includes(
-      String(txData.status || '').toLowerCase().trim()
+      String(statusVal).toLowerCase().trim()
     );
 
     if (isPaid) {
