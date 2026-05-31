@@ -6468,5 +6468,33 @@ document.addEventListener('click', function(e) {
     window.location.href = '/checkout/';
   }
 }, true);
+
+// Show all products on mobile when clicking "Ver tudo"
+document.addEventListener('DOMContentLoaded', function() {
+  document.addEventListener('click', function(e) {
+    var viewAllBtn = e.target.closest('.collection__view-all a');
+    if (viewAllBtn && window.innerWidth < 750) {
+      e.preventDefault();
+      
+      // Find the closest collection section
+      var collection = viewAllBtn.closest('.collection');
+      if (!collection) return;
+      
+      // Find all slider lists inside this collection
+      var activePanel = collection.querySelector('.tab-panel.is-visible');
+      var sliders = activePanel ? activePanel.querySelectorAll('ul.slider') : collection.querySelectorAll('ul.slider');
+      
+      sliders.forEach(function(slider) {
+        slider.classList.add('show-all-mobile');
+        var sliderComponent = slider.closest('slider-component');
+        if (sliderComponent) {
+          sliderComponent.classList.add('slider-show-all-mobile');
+        }
+      });
+      
+      collection.classList.add('collection-show-all-mobile');
+    }
+  });
+});
 </script>
 </body></html>
