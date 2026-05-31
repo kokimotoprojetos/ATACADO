@@ -6699,6 +6699,66 @@ document.addEventListener('click', function(e) {
 document.addEventListener('DOMContentLoaded', () => {
   updateUserUI();
   
+  // Intercept search form submission to run search client-side
+  const searchForms = document.querySelectorAll('form[action="/search"]');
+  searchForms.forEach(form => {
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+      const query = this.querySelector('input[name="q"]')?.value.trim();
+      if (!query) return;
+
+      const products = [
+        { slug: 'camisa-teste-pix', title: 'produto de teste (pix)' },
+        { slug: 'camisa-selecao-brasileira-jogador-2026-27-home', title: 'camisa selecao brasileira jogador 2026/27 i' },
+        { slug: 'camisa-selecao-brasileira-jogador-2026-27-away', title: 'camisa selecao brasileira jogador 2026/27 ii' },
+        { slug: 'camisa-selecao-brasileira-2026-26-home', title: 'camisa selecao brasileira 2026/27 i' },
+        { slug: 'camisa-feminina-selecao-brasileira-2026-27-i', title: 'camisa feminina selecao brasileira 2026/27 i' },
+        { slug: 'camisa-selecao-brasileira-2026-26-away', title: 'camisa selecao brasileira 2026/27 ii' },
+        { slug: 'camisa-feminina-selecao-brasileira-2026-27-ii', title: 'camisa feminina selecao brasileira 2026/27 ii' },
+        { slug: 'camisa-brasil-home-retro-1991-93', title: 'camisa selecao brasil home retro 1991/92' },
+        { slug: 'conjunto-infantil-selecao-brasileira-2026-27-i', title: 'conjunto infantil selecao brasileira 2026/27 i' },
+        { slug: 'camisa-selecao-brasil-2006-retro', title: 'camisa selecao brasil 2006 retro' },
+        { slug: 'camisa-brasil-home-retro-1998', title: 'camisa selecao brasil home retro 1998' },
+        { slug: 'camisa-brasil-home-retro-2002', title: 'camisa selecao brasil home retro 2002' },
+        { slug: 'camisa-brasil-home-retro-1994', title: 'camisa selecao brasil home retro 1994' },
+        { slug: 'camisa-retro-brasil-1998-pronta-entrega', title: 'camisa retro brasil 1998 pronta entrega' }
+      ];
+
+      // Normalize string (remove accents, etc.)
+      const normalize = (str) => str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+      const normQuery = normalize(query);
+
+      let bestMatch = null;
+      let maxMatches = 0;
+      const queryWords = normQuery.split(/\s+/).filter(w => w.length > 1);
+
+      if (queryWords.length === 0) {
+        bestMatch = products.find(p => normalize(p.title).includes(normQuery) || normalize(p.slug).includes(normQuery));
+      } else {
+        products.forEach(product => {
+          let matches = 0;
+          const normTitle = normalize(product.title);
+          const normSlug = normalize(product.slug);
+          queryWords.forEach(word => {
+            if (normTitle.includes(word) || normSlug.includes(word)) {
+              matches++;
+            }
+          });
+          if (matches > maxMatches) {
+            maxMatches = matches;
+            bestMatch = product;
+          }
+        });
+      }
+
+      if (bestMatch) {
+        window.location.href = `/products/${bestMatch.slug}`;
+      } else {
+        alert('Nenhum produto encontrado para a sua busca.');
+      }
+    });
+  });
+  
   // Check if we need to open auth modal from redirect (mobile product page checkout)
   const urlParams = new URLSearchParams(window.location.search);
   if (urlParams.get('openAuth') === 'true') {
