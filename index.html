@@ -981,10 +981,13 @@ first.parentNode.insertBefore(script, first);
 </button>
 <a class="button" href="/collections/all">
                 Voltar à loja
-              </a><p class="cart__login-title h3">Tem uma conta?</p>
-<p class="cart__login-paragraph">
-<a class="link underlined-link" href="https://atacado-imports.vercel.app/customer_authentication/redirect?locale=pt-BR&amp;region_country=BR">Faça login</a> para finalizar a compra com mais rapidez.
-                </p></div>
+              </a>
+              <div id="cart-login-prompt">
+                <p class="cart__login-title h3">Tem uma conta?</p>
+                <p class="cart__login-paragraph">
+                  <a class="link underlined-link" href="#" onclick="event.preventDefault(); const cartDrawer = document.querySelector('cart-drawer'); if (cartDrawer) { cartDrawer.close(); } openAuthModal();">Faça login</a> para finalizar a compra com mais rapidez.
+                </p>
+              </div></div>
 </div></div><div class="drawer__header">
 <h2 class="drawer__heading">Carrinho de Compras</h2>
 <button aria-label="Fechar" class="drawer__close" onclick="this.closest('cart-drawer').close()" type="button">
@@ -6628,6 +6631,12 @@ function updateUserUI() {
   try {
     const session = JSON.parse(sessionString);
     const firstName = session.name.split(' ')[0];
+    
+    // Hide cart login prompt
+    const cartPrompt = document.getElementById('cart-login-prompt');
+    if (cartPrompt) {
+      cartPrompt.style.display = 'none';
+    }
     
     // Desktop Account Link Modification
     const desktopLink = document.querySelector('.header__icon--account');

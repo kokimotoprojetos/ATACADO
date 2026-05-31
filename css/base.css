@@ -4517,7 +4517,6 @@ details-disclosure > details {
 }
 
 /* Barra de progressão no carrinho */
-<style>
   /* Container Principal */
   .cart-progress-wrapper {
     background-color: #FFF8F0; /* Bege claro do fundo */
@@ -4590,18 +4589,6 @@ details-disclosure > details {
     box-shadow: 0 4px 8px rgba(0,0,0,0.25); /* Sombra mais forte para efeito 3D */
     z-index: 2;
   }
-    
-    /* Alterado para o verde mais escuro do final da barra */
-    background-color: #1cb53a; 
-    
-    border: 2px solid #fff;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-    z-index: 2;
-  }
 
   /* Texto descritivo abaixo */
   .cart-progress-text {
@@ -4612,7 +4599,7 @@ details-disclosure > details {
     margin-bottom: 18px;
     line-height: 1.4;
   }
-</style>
+
 
 /* Ícone cartão de crédito no preço parcelado */
 .product-installments .installment-text {
@@ -5169,6 +5156,7 @@ product-info[class*="__main-padding"] {
   .slider-show-all-mobile .scroll-progress-bar-wrapper {
     display: none !important;
   }
+}
   
 /* Disable footer menu links and Facebook icon from being clickable */
 .footer-block__details-content a,
@@ -5357,4 +5345,11 @@ product-info[class*="__main-padding"] {
 .lg-container-wrapper {
   display: none !important;
 }
+
+/* Hide credit card installments globally */
+.product-installments,
+.price-installments {
+  display: none !important;
+}
+
 

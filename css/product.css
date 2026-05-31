@@ -260,13 +260,7 @@ body {
 }
 
 .price-installments {
-  font-size: 14px;
-  font-weight: 600;
-  color: #495057;
-}
-
-.price-installments span.green-text {
-  color: #00c851;
+  display: none !important;
 }
 
 /* Selectors */
