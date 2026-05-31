@@ -6402,6 +6402,25 @@ document.addEventListener('click', function(e) {
   if (checkoutBtn) {
     e.preventDefault();
     e.stopPropagation();
+    
+    // Check if we are on mobile (less than 750px width)
+    const isMobile = window.innerWidth < 750;
+    if (isMobile) {
+      const isLoggedIn = localStorage.getItem('user_session') || sessionStorage.getItem('user_session');
+      if (!isLoggedIn) {
+        // Close cart drawer if active
+        const cartDrawer = document.querySelector('cart-drawer');
+        if (cartDrawer && cartDrawer.classList.contains('active')) {
+          cartDrawer.classList.remove('active');
+        }
+        const drawer = document.querySelector('.drawer');
+        if (drawer && drawer.classList.contains('active')) {
+          drawer.classList.remove('active');
+        }
+        openAuthModal();
+        return;
+      }
+    }
     window.location.href = '/checkout/';
   }
 }, true);
@@ -6614,6 +6633,12 @@ document.addEventListener('click', function(e) {
 
 document.addEventListener('DOMContentLoaded', () => {
   updateUserUI();
+  
+  // Check if we need to open auth modal from redirect (mobile product page checkout)
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('openAuth') === 'true') {
+    openAuthModal();
+  }
 });
 </script>
 </body></html>

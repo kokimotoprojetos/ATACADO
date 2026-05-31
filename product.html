@@ -501,6 +501,15 @@
 
       // Overwrite cart for instant checkout
       localStorage.setItem('cart', JSON.stringify([cartItem]));
+      
+      const isMobile = window.innerWidth < 750;
+      if (isMobile) {
+        const isLoggedIn = localStorage.getItem('user_session') || sessionStorage.getItem('user_session');
+        if (!isLoggedIn) {
+          window.location.href = '/?openAuth=true';
+          return;
+        }
+      }
       window.location.href = '/checkout/';
     }
 
@@ -508,6 +517,14 @@
       if (cart.length === 0) {
         alert('Seu carrinho está vazio.');
         return;
+      }
+      const isMobile = window.innerWidth < 750;
+      if (isMobile) {
+        const isLoggedIn = localStorage.getItem('user_session') || sessionStorage.getItem('user_session');
+        if (!isLoggedIn) {
+          window.location.href = '/?openAuth=true';
+          return;
+        }
       }
       window.location.href = '/checkout/';
     }
