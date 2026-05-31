@@ -1,0 +1,10 @@
+{
+  "cleanUrls": true,
+  "redirects": [
+    {
+      "source": "/products/:slug",
+      "destination": "/product?slug=:slug",
+      "permanent": false
+    }
+  ]
+}

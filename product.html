@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Produto - ATACADO IMPORTS</title>
+  <link rel="stylesheet" href="/css/product.css">
+  <link rel="icon" type="image/png" href="/images/logo.png">
+</head>
+<body>
+
+  <!-- Top Promo Alert Bar -->
+  <div class="top-promo-bar">
+    <span>🚀 COMPRE MAIS E PAGUE MENOS!</span>
+  </div>
+
+  <!-- Header -->
+  <header class="store-header">
+    <div class="header-icons">
+      <!-- Hamburger Menu Icon -->
+      <svg viewBox="0 0 24 24" onclick="window.location.href='/'">
+        <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+      </svg>
+    </div>
+    
+    <a href="/" class="store-logo">
+      <img src="/images/logo.png" alt="ATACADO IMPORTS">
+    </a>
+
+    <div class="header-icons">
+      <!-- Magnifying Glass Icon -->
+      <svg viewBox="0 0 24 24" onclick="window.location.href='/'">
+        <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+      </svg>
+      <!-- Cart Icon -->
+      <div class="cart-badge" onclick="toggleCart()" style="cursor: pointer;">
+        <svg viewBox="0 0 24 24">
+          <path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/>
+        </svg>
+        <span class="cart-count" id="cart-count-badge">0</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Product Section -->
+  <main class="product-page-container">
+    
+    <!-- Left Column: Gallery -->
+    <div class="gallery-container">
+      <div class="main-image-viewport">
+        <img id="main-product-img" src="" alt="Produto">
+        
+        <button class="gallery-nav-btn prev" onclick="navigateGallery(-1)">
+          <svg viewBox="0 0 24 24"><path d="M15.41 7.41 14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+        </button>
+        <button class="gallery-nav-btn next" onclick="navigateGallery(1)">
+          <svg viewBox="0 0 24 24"><path d="M10 6 8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
+        </button>
+        
+        <div class="gallery-indicator" id="gallery-ind-text">1 / 1</div>
+      </div>
+      
+      <div class="thumbnails-row" id="thumbnails-list">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+
+    <!-- Right Column: Information & Form -->
+    <div class="product-info-panel">
+      
+      <!-- Badges -->
+      <div class="product-badges">
+        <span class="product-badge">UNIDADES LIMITADAS</span>
+        <span class="product-badge sale">PROMOÇÃO</span>
+      </div>
+
+      <!-- Title -->
+      <h1 class="product-title" id="product-title-text">Carregando...</h1>
+
+      <!-- Pricing -->
+      <div class="product-pricing-box">
+        <div class="price-row">
+          <span class="price-regular" id="price-reg-text">R$ 0,00</span>
+          <span class="price-sale" id="price-sale-text">R$ 0,00</span>
+          <span class="price-discount-percent" id="price-disc-badge">-0%</span>
+        </div>
+        <div class="price-installments">
+          ou 3x de <span class="green-text" id="price-inst-text">R$ 0,00</span> sem juros
+        </div>
+      </div>
+
+      <!-- Size Selector -->
+      <div>
+        <span class="selector-label">Escolha o Tamanho:</span>
+        <div class="size-selector-grid" id="size-selector">
+          <button class="size-btn" onclick="selectSize(this)">P</button>
+          <button class="size-btn active" onclick="selectSize(this)">M</button>
+          <button class="size-btn" onclick="selectSize(this)">G</button>
+          <button class="size-btn" onclick="selectSize(this)">GG</button>
+          <button class="size-btn" onclick="selectSize(this)">XGG</button>
+        </div>
+      </div>
+
+      <!-- Customization option -->
+      <div class="customization-box">
+        <label class="customization-toggle" onclick="toggleCustomization()">
+          <input type="checkbox" id="custom-checkbox">
+          <span>Personalizar camisa com Nome e Número? (Grátis)</span>
+        </label>
+        <div class="customization-fields" id="custom-fields">
+          <div class="form-group">
+            <label class="form-label" for="custom-name">Nome na Camisa (Max 12 letras):</label>
+            <input class="form-input" type="text" id="custom-name" placeholder="Ex: NEYMAR JR" maxlength="12">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="custom-number">Número na Camisa (Max 2 dígitos):</label>
+            <input class="form-input" type="text" id="custom-number" placeholder="Ex: 10" maxlength="2">
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="btn-actions">
+        <button class="btn-add-cart" type="button" onclick="addToCart()">
+          <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/>
+          </svg>
+          <span>ADICIONAR AO CARRINHO</span>
+        </button>
+        <button class="btn-buy" type="button" onclick="checkoutProduct()">
+          <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 15l-4-4 1.41-1.41L10 13.17l7.59-7.59L19 7l-9 9z"/>
+          </svg>
+          <span>COMPRAR AGORA</span>
+        </button>
+      </div>
+
+      <!-- Shipping Calculator -->
+      <div class="freight-box">
+        <div class="freight-title">Calcular frete e prazo de entrega</div>
+        <div class="freight-form">
+          <input class="freight-input" type="text" id="cep-freight" placeholder="00000-000">
+          <button class="btn-freight" type="button" onclick="calculateFreight()">Calcular</button>
+        </div>
+        <div class="freight-result" id="freight-res-text">
+          🚚 Frete Grátis! Prazo estimado: 7 a 15 dias úteis com rastreamento.
+        </div>
+      </div>
+
+      <!-- Trust Warranties -->
+      <div class="warranties-section">
+        <div class="warranty-card">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 15l-4-4 1.41-1.41L10 13.17l7.59-7.59L19 7l-9 9z"/></svg>
+          <span>Compra 100% Protegida</span>
+        </div>
+        <div class="warranty-card">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm-5 14H4v-4h11v4zm0-5H4V9h11v4zm5 5h-4V9h4v9z"/></svg>
+          <span>Código de Rastreio por E-mail</span>
+        </div>
+        <div class="warranty-card">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+          <span>Garantia de Satisfação de 7 dias</span>
+        </div>
+        <div class="warranty-card">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z"/></svg>
+          <span>Suporte Humanizado Pós-venda</span>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- Cart Sidebar -->
+  <div class="cart-overlay" id="cart-overlay" onclick="toggleCart()"></div>
+  <div class="cart-sidebar" id="cart-sidebar">
+    <div class="cart-sidebar-header">
+      <span>Seu Carrinho</span>
+      <button class="cart-sidebar-close" onclick="toggleCart()">×</button>
+    </div>
+    <div class="cart-sidebar-items" id="cart-items-container">
+      <!-- Items will be rendered here -->
+    </div>
+    <div class="cart-sidebar-footer">
+      <div class="cart-total-row">
+        <span>Total:</span>
+        <span class="cart-total-price" id="cart-total-price">R$ 0,00</span>
+      </div>
+      <button class="btn-checkout-cart" onclick="proceedToCheckout()">
+        FINALIZAR COMPRA
+      </button>
+    </div>
+  </div>
+
+  <div class="toast-added" id="toast-added">Produto adicionado ao carrinho!</div>
+
+  <script>
+    // Database of shirts matching re-priced categories
+    const productsDB = {
+      'camisa-selecao-brasileira-jogador-2026-27-home': {
+        title: 'Camisa Seleção Brasileira Jogador 2026/27 I',
+        images: ['/images/nike_IB5143-724_A_d6db42b1-2dcc-4f91-af49-6e85dccc800e.jpg', '/images/nike_IB5143-724_B.jpg'],
+        promo: 89.90, regular: 149.90, discount: 40, installment: '29,97'
+      },
+      'camisa-selecao-brasileira-jogador-2026-27-away': {
+        title: 'Camisa Seleção Brasileira Jogador 2026/27 II',
+        images: ['/images/09761915A3.png', '/images/09761915A4.png'],
+        promo: 89.90, regular: 149.90, discount: 40, installment: '29,97'
+      },
+      'camisa-selecao-brasileira-2026-26-home': {
+        title: 'Camisa Seleção Brasileira 2026/27 I',
+        images: ['/images/nike_IF7054-724_A.jpg', '/images/nike_IF7054-724_B.jpg'],
+        promo: 79.90, regular: 139.90, discount: 43, installment: '26,63'
+      },
+      'camisa-feminina-selecao-brasileira-2026-27-i': {
+        title: 'Camisa Feminina Seleção Brasileira 2026/27 I',
+        images: ['/images/nike_IB5280-724_A_1_3f27b0ba-bd64-4d8c-b6a1-e17106b8745c.jpg', '/images/nike_IB5280-724_B.jpg'],
+        promo: 74.90, regular: 129.90, discount: 42, installment: '24,97'
+      },
+      'camisa-selecao-brasileira-2026-26-away': {
+        title: 'Camisa Seleção Brasileira 2026/27 II',
+        images: ['/images/09761715A3_e054410c-2531-4e43-9451-98ba9d7f86ff.png', '/images/09761715A4_fda964f3-a518-4850-8599-6fb88cafcea2.png'],
+        promo: 79.90, regular: 139.90, discount: 43, installment: '26,63'
+      },
+      'camisa-feminina-selecao-brasileira-2026-27-ii': {
+        title: 'Camisa Feminina Seleção Brasileira 2026/27 II',
+        images: ['/images/nike_IU1078-417_A_d6b73e1c-02af-441c-a1b5-becaca114474.jpg', '/images/nike_IU1078-417_B_f0fa626f-ec6e-4c33-9e69-4fb1d08388c5.jpg'],
+        promo: 74.90, regular: 129.90, discount: 42, installment: '24,97'
+      },
+      'camisa-brasil-home-retro-1991-93': {
+        title: 'Camisa Seleção Brasil Home - Retrô 1991/92',
+        images: ['/images/ABS2GSldLn4sAu8ZRj_GQBOktQAYKOOj.webp', '/images/ABS2GSlg2GXRLJ2KqdaHZvmGwXbUjq5d.webp'],
+        promo: 89.90, regular: 149.90, discount: 40, installment: '29,97'
+      },
+      'conjunto-infantil-selecao-brasileira-2026-27-i': {
+        title: 'Conjunto Infantil Seleção Brasileira 2026/27 I',
+        images: ['/images/nike_IO8971-724_A_1.jpg', '/images/nike_IO8971-724_B.jpg'],
+        promo: 69.90, regular: 119.90, discount: 42, installment: '23,30'
+      },
+      'camisa-selecao-brasil-2006-retro': {
+        title: 'Camisa Seleção Brasil 2006 Retrô',
+        images: ['/images/hf_20260302_194647_80e08a03-d2e4-4f54-9e4f-12485d4d98c1_1.png', '/images/download_-_2026-04-16T174904.208.png'],
+        promo: 89.90, regular: 149.90, discount: 40, installment: '29,97'
+      },
+      'camisa-brasil-home-retro-1998': {
+        title: 'Camisa Seleção Brasil Home - Retrô 1998',
+        images: ['/images/ABS2GSmmHxzmX_AJiS7LLNzJxQPJhYeI.webp', '/images/ABS2GSkx-H-7hovjJE1y5t7zuXQteOBc.webp'],
+        promo: 89.90, regular: 149.90, discount: 40, installment: '29,97'
+      },
+      'camisa-brasil-home-retro-2002': {
+        title: 'Camisa Seleção Brasil Home - Retrô 2002',
+        images: ['/images/ABS2GSmy2p5t7lrgStxuBV90WTEnj-Cm.jpg', '/images/camisa-brasil-home-retro-2002_3fffb6b7-c182-48b8-9295-ffb81b1befc7.jpg'],
+        promo: 89.90, regular: 149.90, discount: 40, installment: '29,97'
+      },
+      'camisa-brasil-home-retro-1994': {
+        title: 'Camisa Seleção Brasil Home - Retrô 1994',
+        images: ['/images/Gemini_Generated_Image_qnpb1hqnpb1hqnpb.webp', '/images/camisa-brasil-home-retro-1994_73366bdf-eaaf-415c-91d1-c6e082163446.jpg'],
+        promo: 89.90, regular: 149.90, discount: 40, installment: '29,97'
+      },
+      'camisa-retro-brasil-1998-pronta-entrega': {
+        title: 'Camisa Retrô Brasil 1998 [PRONTA ENTREGA]',
+        images: ['/images/download_-_2026-05-04T110742.109.png', '/images/download_-_2026-05-04T110710.987.png'],
+        promo: 89.90, regular: 149.90, discount: 40, installment: '29,97'
+      }
+    };
+
+    let activeProduct = null;
+    let activeImageIndex = 0;
+    let sizeSelected = 'M';
+
+    // Parse URL slug (supports both rewritten path and redirected query param)
+    const path = window.location.pathname;
+    let slug = path.split('/').pop();
+    
+    if (!slug || slug === 'product' || slug === 'product.html') {
+      const params = new URLSearchParams(window.location.search);
+      slug = params.get('slug');
+    }
+    
+    // Resolve product or fallback
+    activeProduct = productsDB[slug] || productsDB['camisa-selecao-brasileira-jogador-2026-27-home'];
+
+    // Render Data
+    document.title = activeProduct.title + " - ATACADO IMPORTS";
+    document.getElementById('product-title-text').innerText = activeProduct.title;
+    document.getElementById('price-reg-text').innerText = 'R$ ' + activeProduct.regular.toFixed(2).replace('.', ',');
+    document.getElementById('price-sale-text').innerText = 'R$ ' + activeProduct.promo.toFixed(2).replace('.', ',');
+    document.getElementById('price-disc-badge').innerText = '-' + activeProduct.discount + '%';
+    document.getElementById('price-inst-text').innerText = 'R$ ' + activeProduct.installment;
+
+    // Gallery Render
+    const mainImg = document.getElementById('main-product-img');
+    const thumbnailsList = document.getElementById('thumbnails-list');
+
+    function renderGallery() {
+      mainImg.src = activeProduct.images[activeImageIndex];
+      document.getElementById('gallery-ind-text').innerText = `${activeImageIndex + 1} / ${activeProduct.images.length}`;
+      
+      // Render thumbnails
+      let thumbHtml = '';
+      activeProduct.images.forEach((img, idx) => {
+        thumbHtml += `
+          <div class="thumbnail-item ${idx === activeImageIndex ? 'active' : ''}" onclick="changeGalleryIndex(${idx})">
+            <img src="${img}" alt="thumbnail">
+          </div>
+        `;
+      });
+      thumbnailsList.innerHTML = thumbHtml;
+    }
+
+    function changeGalleryIndex(index) {
+      activeImageIndex = index;
+      renderGallery();
+    }
+
+    function navigateGallery(direction) {
+      activeImageIndex += direction;
+      if (activeImageIndex >= activeProduct.images.length) activeImageIndex = 0;
+      if (activeImageIndex < 0) activeImageIndex = activeProduct.images.length - 1;
+      renderGallery();
+    }
+
+    // Initialize gallery
+    renderGallery();
+
+    // Size Selection
+    function selectSize(btn) {
+      const btns = document.querySelectorAll('.size-btn');
+      btns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      sizeSelected = btn.innerText;
+    }
+
+    // Customization Toggle
+    function toggleCustomization() {
+      const checkbox = document.getElementById('custom-checkbox');
+      const fields = document.getElementById('custom-fields');
+      if (checkbox.checked) {
+        fields.classList.add('active');
+      } else {
+        fields.classList.remove('active');
+      }
+    }
+
+    // Cart State
+    let cart = JSON.parse(localStorage.getItem('cart')) || [];
+
+    function updateCartBadge() {
+      const badge = document.getElementById('cart-count-badge');
+      const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+      badge.innerText = totalItems;
+      if (totalItems > 0) {
+        badge.style.display = 'flex';
+      } else {
+        badge.style.display = 'none';
+      }
+    }
+
+    function saveCart() {
+      localStorage.setItem('cart', JSON.stringify(cart));
+      updateCartBadge();
+      renderCart();
+    }
+
+    function toggleCart() {
+      const overlay = document.getElementById('cart-overlay');
+      const sidebar = document.getElementById('cart-sidebar');
+      if (sidebar.classList.contains('open')) {
+        sidebar.classList.remove('open');
+        overlay.classList.remove('open');
+      } else {
+        renderCart();
+        sidebar.classList.add('open');
+        overlay.classList.add('open');
+      }
+    }
+
+    function getFormattedProductName() {
+      const checkbox = document.getElementById('custom-checkbox');
+      const nome = document.getElementById('custom-name').value.trim().toUpperCase();
+      const numero = document.getElementById('custom-number').value.trim();
+      
+      let productName = activeProduct.title;
+      if (checkbox && checkbox.checked) {
+        if (!nome || !numero) {
+          alert('Por favor, preencha o Nome e o Número da personalização.');
+          return null;
+        }
+        productName += ` (Personalizada: ${nome} #${numero})`;
+      }
+      return productName;
+    }
+
+    function showToast() {
+      const toast = document.getElementById('toast-added');
+      toast.classList.add('show');
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 3000);
+    }
+
+    function addToCart() {
+      const productName = getFormattedProductName();
+      if (!productName) return;
+
+      const newItem = {
+        name: productName,
+        price: activeProduct.promo,
+        image: activeProduct.images[0].replace(/^\//, ''),
+        quantity: 1,
+        size: sizeSelected,
+        id: Date.now() // unique id for cart item
+      };
+
+      // Check if same item (name + size) exists to just increment qty
+      const existingItem = cart.find(item => item.name === newItem.name && item.size === newItem.size);
+      if (existingItem) {
+        existingItem.quantity += 1;
+      } else {
+        cart.push(newItem);
+      }
+
+      saveCart();
+      showToast();
+    }
+
+    function renderCart() {
+      const container = document.getElementById('cart-items-container');
+      const totalPriceEl = document.getElementById('cart-total-price');
+      
+      if (cart.length === 0) {
+        container.innerHTML = `
+          <div class="cart-empty">
+            <svg viewBox="0 0 24 24"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/></svg>
+            <p>Seu carrinho está vazio.</p>
+          </div>
+        `;
+        totalPriceEl.innerText = 'R$ 0,00';
+        return;
+      }
+
+      let html = '';
+      let total = 0;
+
+      cart.forEach((item, index) => {
+        total += item.price * item.quantity;
+        html += `
+          <div class="cart-item">
+            <img src="/${item.image}" alt="Produto" class="cart-item-img">
+            <div class="cart-item-info">
+              <div class="cart-item-name">${item.name}</div>
+              <div class="cart-item-meta">Tamanho: ${item.size}</div>
+              <div class="cart-item-qty">
+                <button class="qty-btn" onclick="updateItemQty(${index}, -1)">-</button>
+                <span class="qty-val">${item.quantity}</span>
+                <button class="qty-btn" onclick="updateItemQty(${index}, 1)">+</button>
+              </div>
+            </div>
+            <div style="display:flex; flex-direction:column; align-items:flex-end; gap:8px;">
+              <button class="cart-item-remove" onclick="removeItem(${index})">
+                <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+              </button>
+              <div class="cart-item-price">R$ ${(item.price * item.quantity).toFixed(2).replace('.', ',')}</div>
+            </div>
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
+      totalPriceEl.innerText = 'R$ ' + total.toFixed(2).replace('.', ',');
+    }
+
+    function updateItemQty(index, delta) {
+      if (cart[index]) {
+        cart[index].quantity += delta;
+        if (cart[index].quantity <= 0) {
+          cart.splice(index, 1);
+        }
+        saveCart();
+      }
+    }
+
+    function removeItem(index) {
+      cart.splice(index, 1);
+      saveCart();
+    }
+
+    // Direct Checkout Redirect (Buy Now)
+    function checkoutProduct() {
+      const productName = getFormattedProductName();
+      if (!productName) return;
+
+      const cartItem = {
+        name: productName,
+        price: activeProduct.promo,
+        image: activeProduct.images[0].replace(/^\//, ''),
+        quantity: 1,
+        size: sizeSelected,
+        id: Date.now()
+      };
+
+      // Overwrite cart for instant checkout
+      localStorage.setItem('cart', JSON.stringify([cartItem]));
+      window.location.href = '/checkout/';
+    }
+
+    function proceedToCheckout() {
+      if (cart.length === 0) {
+        alert('Seu carrinho está vazio.');
+        return;
+      }
+      window.location.href = '/checkout/';
+    }
+
+    // Initialize cart badge
+    updateCartBadge();
+
+    // Freight Calculation
+    function calculateFreight() {
+      const cep = document.getElementById('cep-freight').value.replace(/\D/g, '');
+      if (cep.length === 8) {
+        document.getElementById('freight-res-text').style.display = 'block';
+      } else {
+        alert('CEP inválido! Digite 8 números.');
+      }
+    }
+  </script>
+</body>
+</html>
