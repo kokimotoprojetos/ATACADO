@@ -1,4 +1,5 @@
 export default async function handler(req, res) {
+  // Trigger Vercel rebuild for new Env Variables
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
@@ -95,7 +96,11 @@ export default async function handler(req, res) {
       return res.status(502).json({ error: 'Gateway de pagamento retornou resposta inválida.' });
     }
 
-    if (!response.ok || !data.success) {
+    // Support both root-level response and documented data-wrapped response
+    const txData = data.hash ? data : (data.data || {});
+    const isSuccess = response.ok && (data.success !== false) && (txData.hash || txData.id);
+
+    if (!isSuccess) {
       console.error('[InvictusPay] Erro ao criar transação:', data);
       return res.status(response.status || 400).json({
         error: data.message || 'Erro ao processar transação no gateway.',
@@ -103,9 +108,9 @@ export default async function handler(req, res) {
       });
     }
 
-    const txData = data.data || {};
-    const pixCode = txData.pix_code;
-    const qrCodeImage = txData.qr_code;
+    // Extract Pix details conforming to actual API response structure
+    const pixCode = txData.pix?.pix_qr_code || txData.pix_code || txData.pix?.pix_code;
+    const qrCodeImage = txData.pix?.qr_code_base64 || txData.qr_code || txData.pix?.qr_code;
 
     if (!pixCode) {
       console.error('[InvictusPay] Código PIX não encontrado na resposta:', data);
@@ -122,7 +127,7 @@ export default async function handler(req, res) {
       qrCode: qrCodeImage,
       pixCode: pixCode,
       expiresAt: txData.expires_at || null,
-      status: txData.status || 'pending'
+      status: txData.status || txData.payment_status || 'pending'
     });
 
   } catch (error) {
