@@ -69,7 +69,6 @@ export default async function handler(req, res) {
       method: 'POST',
       headers: {
         'Api-Access-Key': apiKey,
-        'Transaction-Hash': transactionHash,
         'Content-Type': 'application/json',
         'Accept': 'application/json'
       },
