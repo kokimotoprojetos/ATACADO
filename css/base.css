@@ -5174,3 +5174,11 @@ product-info[class*="__main-padding"] {
     display: none !important;
   }
 }
+
+/* Disable footer menu links and Facebook icon from being clickable */
+.footer-block__details-content a,
+.footer__list-social a[href="#"] {
+  pointer-events: none !important;
+  cursor: default !important;
+  text-decoration: none !important;
+}
