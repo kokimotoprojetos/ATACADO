@@ -6522,12 +6522,16 @@ function handleAuthSubmit(event, type) {
     users.push({ name, email, password });
     localStorage.setItem('mock_registered_users', JSON.stringify(users));
     
-    successMsg.innerText = 'Conta criada com sucesso! Faça login abaixo.';
-    successMsg.style.display = 'block';
+    // Automatically log in the registered user
+    const sessionData = JSON.stringify({ name, email });
+    sessionStorage.setItem('user_session', sessionData); // Default to session storage
+    
+    updateUserUI();
+    closeAuthModal();
     
     // Clear registration fields
     document.getElementById('form-register').reset();
-    switchAuthTab('login');
+    document.getElementById('form-login').reset();
     
   } else if (type === 'login') {
     const email = document.getElementById('login-email').value.trim().toLowerCase();
