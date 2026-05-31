@@ -31,6 +31,9 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: 'Configuração de pagamento incompleta no servidor.' });
     }
 
+    console.log('[LytronPay Debug] Key Length:', apiKey.length, 'Secret Length:', secretHash.length);
+    console.log('[LytronPay Debug] Key Starts With:', apiKey.substring(0, 10), 'Secret Starts With:', secretHash.substring(0, 10));
+
     const cleanCpf = cpf.replace(/\D/g, '');
     const cleanPhone = telefone.replace(/\D/g, '');
     const amountFloat = parseFloat(Number(total).toFixed(2));
