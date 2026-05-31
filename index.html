@@ -6706,13 +6706,18 @@ function updateUserUI() {
 document.addEventListener('click', function(e) {
   var accBtn = e.target.closest('.header__icon--account') || e.target.closest('.menu-drawer__account');
   if (accBtn) {
-    // Check if user is logged in
-    const isLoggedIn = localStorage.getItem('user_session') || sessionStorage.getItem('user_session');
-    if (isLoggedIn) return; // Do not open modal if already logged in
-    
     e.preventDefault();
     e.stopPropagation();
-    openAuthModal();
+    
+    // Check if user is logged in
+    const isLoggedIn = localStorage.getItem('user_session') || sessionStorage.getItem('user_session');
+    if (isLoggedIn) {
+      if (confirm('Deseja sair da sua conta?')) {
+        logoutUser();
+      }
+    } else {
+      openAuthModal();
+    }
   }
 }, true);
 

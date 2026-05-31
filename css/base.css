@@ -5353,3 +5353,8 @@ product-info[class*="__main-padding"] {
   color: #888;
 }
 
+/* Hide pre-appeared products in search drawer */
+.lg-container-wrapper {
+  display: none !important;
+}
+
