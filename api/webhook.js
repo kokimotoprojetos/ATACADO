@@ -1,6 +1,31 @@
+import crypto from 'node:crypto';
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).send('Method Not Allowed');
+  }
+
+  // Verify webhook signature if secret is configured
+  const signature = req.headers['transaction-hash'];
+  const webhookSecret = process.env.LYTRON_WEBHOOK_SECRET;
+
+  if (webhookSecret && signature) {
+    try {
+      const payloadString = typeof req.body === 'string' ? req.body : JSON.stringify(req.body);
+      const computedSignature = crypto
+        .createHmac('sha256', webhookSecret)
+        .update(payloadString)
+        .digest('hex');
+
+      if (computedSignature !== signature) {
+        console.warn('[LytronPay Webhook] Signature verification failed. Computed:', computedSignature, 'Received:', signature);
+        return res.status(401).json({ error: 'Invalid signature' });
+      }
+      console.log('[LytronPay Webhook] Signature verified successfully.');
+    } catch (err) {
+      console.error('[LytronPay Webhook] Error verifying signature:', err);
+      return res.status(400).json({ error: 'Signature verification error' });
+    }
   }
 
   try {
