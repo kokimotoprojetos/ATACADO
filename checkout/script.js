@@ -417,7 +417,7 @@ async function iniciarPIX() {
     
   } catch (error) {
     console.error('Error generating PIX:', error);
-    alert('Erro ao processar pagamento via PIX. Verifique seus dados e tente novamente.');
+    alert(error.message || 'Erro ao processar pagamento via PIX. Verifique seus dados e tente novamente.');
     switchStep(2); // return to address to try again
   }
 }
