@@ -463,6 +463,9 @@ function mostrarSucesso() {
   // Clear cart storage
   localStorage.setItem('cart', '[]');
   
+  // Store purchase timestamp to calculate tracking availability
+  localStorage.setItem('last_purchase_date', Date.now().toString());
+  
   // Hide active step container
   document.getElementById(`step-3-container`).classList.remove('active');
   

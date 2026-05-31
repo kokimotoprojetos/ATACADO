@@ -6631,6 +6631,23 @@ document.addEventListener('click', function(e) {
   }
 }, true);
 
+// Intercept click on tracking links if purchase was made less than 3 days ago
+document.addEventListener('click', function(e) {
+  var trackingLink = e.target.closest('[href*="parcelpanel"]');
+  if (trackingLink) {
+    var lastPurchase = localStorage.getItem('last_purchase_date');
+    if (lastPurchase) {
+      var diffTime = Date.now() - parseInt(lastPurchase);
+      var threeDays = 3 * 24 * 60 * 60 * 1000;
+      if (diffTime < threeDays) {
+        e.preventDefault();
+        e.stopPropagation();
+        alert('O rastreamento do seu pedido estará disponível em até 3 dias após a confirmação do pagamento. Fique atento ao seu e-mail para receber as atualizações de envio.');
+      }
+    }
+  }
+});
+
 document.addEventListener('DOMContentLoaded', () => {
   updateUserUI();
   
