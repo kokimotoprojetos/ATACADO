@@ -392,7 +392,9 @@ async function iniciarPIX() {
     
     const data = await response.json();
     if (!response.ok) {
-      throw new Error(data.error || 'Erro ao gerar pagamento PIX');
+      const err = new Error(data.error || 'Erro ao gerar pagamento PIX');
+      err.details = data.details;
+      throw err;
     }
     
     paymentId = data.paymentId;
@@ -417,7 +419,11 @@ async function iniciarPIX() {
     
   } catch (error) {
     console.error('Error generating PIX:', error);
-    alert(error.message || 'Erro ao processar pagamento via PIX. Verifique seus dados e tente novamente.');
+    let msg = error.message || 'Erro ao processar pagamento via PIX. Verifique seus dados e tente novamente.';
+    if (error.details) {
+      msg += '\n\nDetalhes do erro: ' + JSON.stringify(error.details);
+    }
+    alert(msg);
     switchStep(2); // return to address to try again
   }
 }
