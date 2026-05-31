@@ -6459,6 +6459,56 @@ document.addEventListener("DOMContentLoaded", function() {
   };
 </script>
 </div>
+<!-- Modal de Login/Cadastro -->
+<div id="auth-modal" class="auth-modal-overlay">
+  <div class="auth-modal-card">
+    <button class="auth-close-btn" onclick="closeAuthModal()">&times;</button>
+    <div class="auth-tabs">
+      <div id="tab-login" class="auth-tab active" onclick="switchAuthTab('login')">Entrar</div>
+      <div id="tab-register" class="auth-tab" onclick="switchAuthTab('register')">Criar Conta</div>
+    </div>
+
+    <!-- Mensagem de Sucesso -->
+    <div id="auth-success-msg" class="auth-success-msg"></div>
+
+    <!-- Form de Login -->
+    <form id="form-login" class="auth-form active" onsubmit="handleAuthSubmit(event, 'login')">
+      <div class="auth-input-group">
+        <label for="login-email">E-mail</label>
+        <input type="email" id="login-email" required placeholder="seuemail@exemplo.com">
+      </div>
+      <div class="auth-input-group">
+        <label for="login-password">Senha</label>
+        <input type="password" id="login-password" required placeholder="Sua senha">
+      </div>
+      <div class="auth-checkbox-group">
+        <input type="checkbox" id="login-remember">
+        <label for="login-remember">Lembrar de mim (Manter conectado)</label>
+      </div>
+      <div id="login-error" class="auth-error-msg"></div>
+      <button type="submit" class="auth-submit-btn" style="margin-top: 10px;">Entrar</button>
+    </form>
+
+    <!-- Form de Cadastro -->
+    <form id="form-register" class="auth-form" onsubmit="handleAuthSubmit(event, 'register')">
+      <div class="auth-input-group">
+        <label for="register-name">Nome Completo</label>
+        <input type="text" id="register-name" required placeholder="Seu nome completo">
+      </div>
+      <div class="auth-input-group">
+        <label for="register-email">E-mail</label>
+        <input type="email" id="register-email" required placeholder="seuemail@exemplo.com">
+      </div>
+      <div class="auth-input-group">
+        <label for="register-password">Senha</label>
+        <input type="password" id="register-password" required placeholder="Crie uma senha (mín. 6 caracteres)">
+      </div>
+      <div id="register-error" class="auth-error-msg"></div>
+      <button type="submit" class="auth-submit-btn" style="margin-top: 15px;">Criar minha conta</button>
+    </form>
+  </div>
+</div>
+
 <script>
 document.addEventListener('click', function(e) {
   const checkoutBtn = e.target.closest('.cart__checkout-button') || e.target.closest('[name="checkout"]');
@@ -6493,6 +6543,179 @@ document.addEventListener('DOMContentLoaded', function() {
       });
       
       collection.classList.add('collection-show-all-mobile');
+    }
+  });
+});
+
+// Authentication System Logic (Mock Registration and Login with Session Persistence choice)
+function openAuthModal() {
+  const modal = document.getElementById('auth-modal');
+  modal.style.display = 'flex';
+  setTimeout(() => modal.classList.add('active'), 10);
+}
+
+function closeAuthModal() {
+  const modal = document.getElementById('auth-modal');
+  modal.classList.remove('active');
+  setTimeout(() => modal.style.display = 'none', 300);
+}
+
+function switchAuthTab(tab) {
+  const tabLogin = document.getElementById('tab-login');
+  const tabRegister = document.getElementById('tab-register');
+  const formLogin = document.getElementById('form-login');
+  const formRegister = document.getElementById('form-register');
+  
+  if (tab === 'login') {
+    tabLogin.classList.add('active');
+    tabRegister.classList.remove('active');
+    formLogin.classList.add('active');
+    formRegister.classList.remove('active');
+  } else {
+    tabLogin.classList.remove('active');
+    tabRegister.classList.add('active');
+    formLogin.classList.remove('active');
+    formRegister.classList.add('active');
+  }
+}
+
+function handleAuthSubmit(event, type) {
+  event.preventDefault();
+  
+  const successMsg = document.getElementById('auth-success-msg');
+  const loginError = document.getElementById('login-error');
+  const registerError = document.getElementById('register-error');
+  
+  // Clear messages
+  successMsg.style.display = 'none';
+  loginError.style.display = 'none';
+  registerError.style.display = 'none';
+  
+  // Local Database of Users
+  let users = JSON.parse(localStorage.getItem('mock_registered_users') || '[]');
+  
+  if (type === 'register') {
+    const name = document.getElementById('register-name').value.trim();
+    const email = document.getElementById('register-email').value.trim().toLowerCase();
+    const password = document.getElementById('register-password').value;
+    
+    if (password.length < 6) {
+      registerError.innerText = 'A senha deve conter pelo menos 6 caracteres.';
+      registerError.style.display = 'block';
+      return;
+    }
+    
+    const userExists = users.some(u => u.email === email);
+    if (userExists) {
+      registerError.innerText = 'Este e-mail já está cadastrado.';
+      registerError.style.display = 'block';
+      return;
+    }
+    
+    // Save new user
+    users.push({ name, email, password });
+    localStorage.setItem('mock_registered_users', JSON.stringify(users));
+    
+    successMsg.innerText = 'Conta criada com sucesso! Faça login abaixo.';
+    successMsg.style.display = 'block';
+    
+    // Clear registration fields
+    document.getElementById('form-register').reset();
+    switchAuthTab('login');
+    
+  } else if (type === 'login') {
+    const email = document.getElementById('login-email').value.trim().toLowerCase();
+    const password = document.getElementById('login-password').value;
+    const rememberMe = document.getElementById('login-remember').checked;
+    
+    const user = users.find(u => u.email === email && u.password === password);
+    if (!user) {
+      loginError.innerText = 'E-mail ou senha incorretos.';
+      loginError.style.display = 'block';
+      return;
+    }
+    
+    // Persist session
+    const sessionData = JSON.stringify({ name: user.name, email: user.email });
+    
+    if (rememberMe) {
+      // Keeps user logged in across browser sessions
+      localStorage.setItem('user_session', sessionData);
+    } else {
+      // Session expires when the tab/browser is closed
+      sessionStorage.setItem('user_session', sessionData);
+    }
+    
+    updateUserUI();
+    closeAuthModal();
+    document.getElementById('form-login').reset();
+  }
+}
+
+function logoutUser(event) {
+  if (event) {
+    event.preventDefault();
+    event.stopPropagation();
+  }
+  localStorage.removeItem('user_session');
+  sessionStorage.removeItem('user_session');
+  location.reload();
+}
+
+function updateUserUI() {
+  // Check both storage options
+  const sessionString = localStorage.getItem('user_session') || sessionStorage.getItem('user_session');
+  if (!sessionString) return;
+  
+  try {
+    const session = JSON.parse(sessionString);
+    const firstName = session.name.split(' ')[0];
+    
+    // Desktop Account Link Modification
+    const desktopLink = document.querySelector('.header__icon--account');
+    if (desktopLink) {
+      desktopLink.innerHTML = `
+        <div class="header-user-status">
+          <span>Olá, <strong>${firstName}</strong></span>
+          <button onclick="logoutUser(event)">Sair</button>
+        </div>
+      `;
+      // Remove default href to avoid navigations
+      desktopLink.removeAttribute('href');
+      desktopLink.style.cursor = 'default';
+    }
+    
+    // Mobile Account Link Modification
+    const mobileLink = document.querySelector('.menu-drawer__account');
+    if (mobileLink) {
+      mobileLink.innerHTML = `
+        <div class="header-user-status" style="padding: 1.5rem 0 1.5rem 2rem;">
+          <span>Olá, <strong>${firstName}</strong></span>
+          <button onclick="logoutUser(event)" style="margin-left: 10px;">Sair</button>
+        </div>
+      `;
+      mobileLink.removeAttribute('href');
+      mobileLink.style.cursor = 'default';
+    }
+  } catch (e) {
+    console.error('Error restoring session:', e);
+  }
+}
+
+// Bind custom modal launch on click
+document.addEventListener('DOMContentLoaded', () => {
+  updateUserUI();
+  
+  document.addEventListener('click', function(e) {
+    // Check if user is logged in
+    const isLoggedIn = localStorage.getItem('user_session') || sessionStorage.getItem('user_session');
+    if (isLoggedIn) return; // Do not open modal if already logged in
+    
+    var accBtn = e.target.closest('.header__icon--account') || e.target.closest('.menu-drawer__account');
+    if (accBtn) {
+      e.preventDefault();
+      e.stopPropagation();
+      openAuthModal();
     }
   });
 });
