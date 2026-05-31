@@ -22,7 +22,7 @@ export default async function handler(req, res) {
     }
 
     // Read InvictusPay key safely (either Vercel env variable or fallback token)
-    const apiKey = process.env.INVICTUS_API_KEY || Buffer.from('NHB1Rkp4d21XQlZoS2w0UWNuaFJuUm9iNTRZc2NFWUZCZkZTQUNyMGxqRzRoVm4xdWFCMmVXUHNNV1FZ', 'base64').toString('utf8');
+    const apiKey = process.env.INVICTUS_API_KEY || Buffer.from('NHB1Rkp4d21XQlZoS2w0UWNuQlJuUm9iNTRZc2NFWUZCZUZTYUNyMGxqRzRoVm4xdWFCMmVYUHNNV1FZ', 'base64').toString('utf8');
     const offerHash = process.env.INVICTUS_OFFER_HASH || 'sflcapne6m';
 
     if (!apiKey) {

@@ -15,7 +15,7 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Missing transaction hash' });
     }
 
-    const apiKey = process.env.INVICTUS_API_KEY || Buffer.from('NHB1Rkp4d21XQlZoS2w0UWNuaFJuUm9iNTRZc2NFWUZCZkZTQUNyMGxqRzRoVm4xdWFCMmVXUHNNV1FZ', 'base64').toString('utf8');
+    const apiKey = process.env.INVICTUS_API_KEY || Buffer.from('NHB1Rkp4d21XQlZoS2w0UWNuQlJuUm9iNTRZc2NFWUZCZUZTYUNyMGxqRzRoVm4xdWFCMmVXUHNNV1FZ', 'base64').toString('utf8');
     if (!apiKey) {
       return res.status(500).json({ error: 'Configuração de pagamento incompleta.' });
     }
