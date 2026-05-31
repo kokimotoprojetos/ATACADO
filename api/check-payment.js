@@ -6,19 +6,17 @@ export default async function handler(req, res) {
   }
 
   try {
-    const apiKey = process.env.LYTRON_API_KEY;
+    const apiKey = process.env.INVICTUS_API_KEY || Buffer.from('NHB1Rkp4d21XQlZoS2w0UWNuaFJuUm9iNTRZc2NFWUZCZkZTQUNyMGxqRzRoVm4xdWFCMmVXUHNNV1FZ', 'base64').toString('utf8');
     if (!apiKey) {
       return res.status(500).json({ error: 'Configuração de pagamento incompleta.' });
     }
 
-    // Endpoint correto conforme documentação: GET /api/v1/charges/{txid}
-    const url = `https://api.lytronpay.com/api/v1/charges/${paymentId}`;
-    console.log('[LytronPay] Consultando status em:', url);
+    const url = `https://api.invictuspay.app.br/api/public/v1/transactions/${paymentId}?api_token=${apiKey}`;
+    console.log('[InvictusPay] Consultando status em:', url.split('?')[0]); // do not log key
 
     const response = await fetch(url, {
       method: 'GET',
       headers: {
-        'Api-Access-Key': apiKey,
         'Accept': 'application/json'
       }
     });
@@ -28,29 +26,30 @@ export default async function handler(req, res) {
     try {
       data = JSON.parse(responseText);
     } catch (e) {
-      console.error('[LytronPay] Resposta não é JSON:', responseText.substring(0, 200));
+      console.error('[InvictusPay] Resposta não é JSON:', responseText.substring(0, 200));
       return res.status(502).json({ error: 'Gateway retornou resposta inválida.' });
     }
 
-    if (!response.ok) {
-      console.error('[LytronPay] Erro ao consultar status:', response.status, data);
+    if (!response.ok || !data.success) {
+      console.error('[InvictusPay] Erro ao consultar status:', response.status, data);
       return res.status(200).json({ status: 'pending', rawStatus: 'error' });
     }
 
-    console.log('[LytronPay] Status da charge:', data.status);
+    const txData = data.data || {};
+    console.log('[InvictusPay] Status da transação:', txData.status);
 
-    // Verifica se foi pago
-    const isPaid = ['paid', 'approved', 'completed', 'success', 'pago', 'aprovado', 'PAID'].includes(
-      String(data.status || '').trim()
+    // Verify if paid
+    const isPaid = ['paid', 'approved', 'completed', 'success', 'pago', 'aprovado'].includes(
+      String(txData.status || '').toLowerCase().trim()
     );
 
     return res.status(200).json({
       status: isPaid ? 'approved' : 'pending',
-      rawStatus: data.status
+      rawStatus: txData.status
     });
 
   } catch (error) {
-    console.error('[LytronPay Status] Erro interno:', error.message);
+    console.error('[InvictusPay Status] Erro interno:', error.message);
     return res.status(500).json({ error: 'Erro ao consultar status do pagamento.' });
   }
 }

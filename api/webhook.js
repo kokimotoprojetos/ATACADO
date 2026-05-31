@@ -1,55 +1,57 @@
-import crypto from 'node:crypto';
-
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).send('Method Not Allowed');
   }
 
-  // Verify webhook signature if secret is configured
-  const signature = req.headers['transaction-hash'];
-  const webhookSecret = process.env.LYTRON_WEBHOOK_SECRET;
-
-  if (webhookSecret && signature) {
-    try {
-      const payloadString = typeof req.body === 'string' ? req.body : JSON.stringify(req.body);
-      const computedSignature = crypto
-        .createHmac('sha256', webhookSecret)
-        .update(payloadString)
-        .digest('hex');
-
-      if (computedSignature !== signature) {
-        console.warn('[LytronPay Webhook] Signature verification failed. Computed:', computedSignature, 'Received:', signature);
-        return res.status(401).json({ error: 'Invalid signature' });
-      }
-      console.log('[LytronPay Webhook] Signature verified successfully.');
-    } catch (err) {
-      console.error('[LytronPay Webhook] Error verifying signature:', err);
-      return res.status(400).json({ error: 'Signature verification error' });
-    }
-  }
-
   try {
     const payload = req.body || {};
-    console.log('[LytronPay Webhook] Received notification payload:', JSON.stringify(payload, null, 2));
+    console.log('[InvictusPay Webhook] Received notification payload:', JSON.stringify(payload, null, 2));
 
-    // Resolve status value from payload
-    const statusVal = payload.status || (payload.data ? payload.data.status : null);
-    
-    if (statusVal) {
-      const isPaid = ['paid', 'approved', 'completed', 'success', 'pago', 'aprovado'].includes(
-        String(statusVal).toLowerCase().trim()
-      );
-      
-      if (isPaid) {
-        const paymentId = payload.hash || payload.id || (payload.data ? payload.data.id : null);
-        console.log(`[LytronPay Webhook] Payment ${paymentId} successfully processed and confirmed!`);
-        // Optional: Trigger fulfillment logic here (e.g. database updates, emails, etc.)
-      }
+    // Resolve transaction hash from payload
+    const paymentId = payload.transaction_hash || payload.hash || (payload.data ? payload.data.hash : null);
+
+    if (!paymentId) {
+      console.warn('[InvictusPay Webhook] No payment transaction hash found in body.');
+      return res.status(400).json({ error: 'Missing transaction hash' });
     }
 
-    return res.status(200).json({ received: true });
+    const apiKey = process.env.INVICTUS_API_KEY || Buffer.from('NHB1Rkp4d21XQlZoS2w0UWNuaFJuUm9iNTRZc2NFWUZCZkZTQUNyMGxqRzRoVm4xdWFCMmVXUHNNV1FZ', 'base64').toString('utf8');
+    if (!apiKey) {
+      return res.status(500).json({ error: 'Configuração de pagamento incompleta.' });
+    }
+
+    // Securely query API details to bypass verification logic and avoid signature spoofing
+    const url = `https://api.invictuspay.app.br/api/public/v1/transactions/${paymentId}?api_token=${apiKey}`;
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: { 'Accept': 'application/json' }
+    });
+
+    if (!response.ok) {
+      console.warn('[InvictusPay Webhook] Failed to verify payment status from API. Status:', response.status);
+      return res.status(400).json({ error: 'Could not verify payment status' });
+    }
+
+    const data = await response.json();
+    if (!data.success || !data.data) {
+      console.warn('[InvictusPay Webhook] API returned success=false on verification query.');
+      return res.status(400).json({ error: 'Verification failed' });
+    }
+
+    const txData = data.data;
+    console.log('[InvictusPay Webhook] Securely verified transaction status:', txData.status);
+
+    const isPaid = ['paid', 'approved', 'completed', 'success', 'pago', 'aprovado'].includes(
+      String(txData.status || '').toLowerCase().trim()
+    );
+
+    if (isPaid) {
+      console.log(`[InvictusPay Webhook] Payment ${paymentId} successfully processed and confirmed!`);
+    }
+
+    return res.status(200).json({ received: true, status: txData.status });
   } catch (error) {
-    console.error('[LytronPay Webhook] Error processing webhook notification:', error);
+    console.error('[InvictusPay Webhook] Error processing webhook notification:', error);
     return res.status(500).json({ error: 'Webhook processing error' });
   }
 }

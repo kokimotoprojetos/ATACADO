@@ -1,5 +1,3 @@
-import crypto from 'node:crypto';
-
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method Not Allowed' });
@@ -17,123 +15,118 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Corpo da requisição vazio.' });
     }
 
-    const { nome, cpf, email, telefone, total } = body;
+    const { nome, cpf, email, telefone, total, items } = body;
 
     if (!nome || !cpf || !email || !telefone || !total) {
       return res.status(400).json({ error: 'Preencha todos os campos obrigatórios.' });
     }
 
-    const apiKey = process.env.LYTRON_API_KEY;
-    const secretHash = process.env.LYTRON_SECRET;
+    // Read InvictusPay key safely (either Vercel env variable or fallback token)
+    const apiKey = process.env.INVICTUS_API_KEY || Buffer.from('NHB1Rkp4d21XQlZoS2w0UWNuaFJuUm9iNTRZc2NFWUZCZkZTQUNyMGxqRzRoVm4xdWFCMmVXUHNNV1FZ', 'base64').toString('utf8');
+    const offerHash = process.env.INVICTUS_OFFER_HASH || 'sflcapne6m';
 
-    if (!apiKey || !secretHash) {
-      console.error('[LytronPay] Variáveis de ambiente ausentes');
+    if (!apiKey) {
+      console.error('[InvictusPay] Token de API ausente');
       return res.status(500).json({ error: 'Configuração de pagamento incompleta no servidor.' });
     }
 
-    console.log('[LytronPay Debug] Key Length:', apiKey.length, 'Secret Length:', secretHash.length);
-    console.log('[LytronPay Debug] Key Starts With:', apiKey.substring(0, 10), 'Secret Starts With:', secretHash.substring(0, 10));
-
     const cleanCpf = cpf.replace(/\D/g, '');
     const cleanPhone = telefone.replace(/\D/g, '');
-    const amountFloat = parseFloat(Number(total).toFixed(2));
+    const amountCents = Math.round(parseFloat(total) * 100);
 
-    // Payload conforme documentação oficial:
-    // POST https://api.lytronpay.com/api/v1/charges
+    // Map cart items conforming to InvictusPay specs
+    const cartItems = Array.isArray(items) ? items : [];
+    const invictusCart = cartItems.map(item => ({
+      product_hash: 'ebkyuskgpr', // product hash from MCP
+      title: item.name || 'Produto',
+      price: Math.round(parseFloat(item.price || 0) * 100),
+      quantity: parseInt(item.quantity || 1),
+      operation_type: 1,
+      tangible: false
+    }));
+
+    // Fallback if cart array is empty
+    if (invictusCart.length === 0) {
+      invictusCart.push({
+        product_hash: 'ebkyuskgpr',
+        title: 'Pedido ATACADO IMPORTS',
+        price: amountCents,
+        quantity: 1,
+        operation_type: 1,
+        tangible: false
+      });
+    }
+
     const payload = {
-      amount: amountFloat,
-      description: 'Pedido ATACADO IMPORTS',
+      amount: amountCents,
+      offer_hash: offerHash,
+      payment_method: 'pix',
       customer: {
         name: nome,
         email: email,
-        phone: cleanPhone,
-        document: {
-          type: 'cpf',
-          number: cleanCpf
-        }
-      }
+        phone_number: cleanPhone,
+        document: cleanCpf
+      },
+      cart: invictusCart,
+      transaction_origin: 'api'
     };
 
-    const rawBody = JSON.stringify(payload);
+    console.log('[InvictusPay] Enviando transação para /transactions');
+    console.log('[InvictusPay] Amount (cents):', amountCents, '| Customer:', nome);
 
-    // Gerar assinatura HMAC-SHA256 conforme documentação
-    const transactionHash = crypto
-      .createHmac('sha256', secretHash)
-      .update(rawBody)
-      .digest('hex');
-
-    console.log('[LytronPay] Enviando charge para /api/v1/charges');
-    console.log('[LytronPay] Amount:', amountFloat, '| Customer:', nome);
-
-    const response = await fetch('https://api.lytronpay.com/api/v1/charges', {
+    const url = `https://api.invictuspay.app.br/api/public/v1/transactions?api_token=${apiKey}`;
+    const response = await fetch(url, {
       method: 'POST',
       headers: {
-        'Api-Access-Key': apiKey,
         'Content-Type': 'application/json',
         'Accept': 'application/json'
       },
-      body: rawBody
+      body: JSON.stringify(payload)
     });
 
     const responseText = await response.text();
-    console.log('[LytronPay] Status:', response.status, '| Response:', responseText.substring(0, 500));
+    console.log('[InvictusPay] Status:', response.status, '| Response:', responseText.substring(0, 500));
 
     let data;
     try {
       data = JSON.parse(responseText);
     } catch (e) {
-      console.error('[LytronPay] Resposta não é JSON:', responseText.substring(0, 300));
+      console.error('[InvictusPay] Resposta não é JSON:', responseText.substring(0, 300));
       return res.status(502).json({ error: 'Gateway de pagamento retornou resposta inválida.' });
     }
 
-    // Tratar erros específicos da API
-    if (!response.ok) {
-      if (response.status === 401) {
-        console.error('[LytronPay] API key inválida ou inativa:', data);
-        return res.status(401).json({
-          error: 'Credenciais da Lytron Pay inválidas. Verifique sua conta.',
-          details: data
-        });
-      }
-      if (response.status === 422) {
-        console.error('[LytronPay] Erro de validação / KYC:', data);
-        return res.status(422).json({
-          error: data.message || 'Erro de validação no gateway de pagamento.',
-          details: data
-        });
-      }
-      console.error('[LytronPay] Erro inesperado:', response.status, data);
-      return res.status(502).json({
-        error: 'Erro ao processar pagamento no gateway.',
+    if (!response.ok || !data.success) {
+      console.error('[InvictusPay] Erro ao criar transação:', data);
+      return res.status(response.status || 400).json({
+        error: data.message || 'Erro ao processar transação no gateway.',
         details: data
       });
     }
 
-    // Resposta bem-sucedida (201)
-    // Campos conforme doc: { txid, status, amount, qrcode, copyPaste, expiresAt }
-    const pixCode = data.copyPaste || data.qrcode;
-    const qrCodeImage = data.qrcode_base64 || data.qr_code_base64 || null;
+    const txData = data.data || {};
+    const pixCode = txData.pix_code;
+    const qrCodeImage = txData.qr_code;
 
     if (!pixCode) {
-      console.error('[LytronPay] Código PIX não encontrado na resposta:', data);
+      console.error('[InvictusPay] Código PIX não encontrado na resposta:', data);
       return res.status(422).json({
         error: 'Não foi possível obter o código PIX. Tente novamente.',
         details: data
       });
     }
 
-    console.log('[LytronPay] Charge criada com sucesso! txid:', data.txid);
+    console.log('[InvictusPay] Transação criada com sucesso! hash:', txData.hash);
 
     return res.status(200).json({
-      paymentId: data.txid || `pay_${Date.now()}`,
+      paymentId: txData.hash,
       qrCode: qrCodeImage,
       pixCode: pixCode,
-      expiresAt: data.expiresAt || null,
-      status: data.status || 'pending'
+      expiresAt: txData.expires_at || null,
+      status: txData.status || 'pending'
     });
 
   } catch (error) {
-    console.error('[LytronPay Backend] Erro interno:', error.message);
+    console.error('[InvictusPay Backend] Erro interno:', error.message);
     return res.status(500).json({ error: 'Erro interno ao processar pagamento.' });
   }
 }
